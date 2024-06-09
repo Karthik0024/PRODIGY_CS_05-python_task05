@@ -1,0 +1,35 @@
+from scapy.all import sniff, IP, TCP, UDP, Raw
+
+def analyze_packet(pkt):
+    if IP in pkt:
+        ip_info = pkt[IP]
+        proto = ''
+
+        if pkt.haslayer(TCP):
+            proto = 'TCP'
+        elif pkt.haslayer(UDP):
+            proto = 'UDP'
+
+        data = pkt[Raw].load if pkt.haslayer(Raw) else None
+
+        print(f"Source IP: {ip_info.src}")
+        print(f"Destination IP: {ip_info.dst}")
+        print(f"Protocol: {proto}")
+        if data:
+            print(f"Payload: {data}")
+        print("\n")
+
+def capture_packets(iface=None):
+    sniff(iface=iface, prn=analyze_packet, store=0)
+
+if __name__ == "__main__":
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Network packet sniffer for educational purposes.")
+    parser.add_argument('-i', '--interface', help="Specify the network interface to capture packets from (e.g., eth0, wlan0)")
+
+    options = parser.parse_args()
+
+    print("Packet sniffer is running...")
+    print("Terminate with Ctrl+C...")
+    capture_packets(iface=options.interface)
